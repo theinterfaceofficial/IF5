@@ -1,4 +1,3 @@
-// src/pages/UniversityDetails.jsx
 import { GlobalConfig } from "../../GlobalConfig.jsx";
 import api from "../../utils/service-base";
 import { useEffect, useState } from "react";
@@ -6,9 +5,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 import UniversityInformationTab from "../../components/universityDetails/UniversityInformationTab.jsx";
 import ProgramsTab from "../../components/universityDetails/ProgramsTab.jsx";
-// You can add more tabs here as needed, e.g.,
-// import CoursesTab from "../../components/universities/CoursesTab.jsx";
-// import ContactsTab from "../../components/universities/ContactsTab.jsx";
 
 export default function UniversityDetails() {
   const { id } = useParams();

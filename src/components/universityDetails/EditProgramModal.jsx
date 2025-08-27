@@ -14,9 +14,11 @@ const editProgramSchema = z.object({
   ),
   isActive: z.boolean(),
   description: z.string().optional(),
+  programTypeId: z.string().min(1, "Program type is required"), // Add validation for ProgramTypeId
 });
 
-export default function EditProgramModal({ program, onClose }) {
+export default function EditProgramModal({ program, programTypes, onClose }) {
+  // Accept programTypes prop
   const {
     register,
     handleSubmit,
@@ -26,15 +28,14 @@ export default function EditProgramModal({ program, onClose }) {
   } = useForm({
     resolver: zodResolver(editProgramSchema),
     defaultValues: {
-      // Set default values from the program prop
       name: program.name,
       durationYears: program.durationYears,
       isActive: program.isActive,
-      description: program.description || "", // Ensure description is not null
+      description: program.description || "",
+      programTypeId: program.programTypeId, // Set default value from the program object
     },
   });
 
-  // Reset form when the program prop changes (e.g., a different program is selected for editing)
   useEffect(() => {
     if (program) {
       reset({
@@ -42,6 +43,7 @@ export default function EditProgramModal({ program, onClose }) {
         durationYears: program.durationYears,
         isActive: program.isActive,
         description: program.description || "",
+        programTypeId: program.programTypeId, // Update on program change
       });
     }
   }, [program, reset]);
@@ -50,14 +52,14 @@ export default function EditProgramModal({ program, onClose }) {
     try {
       const payload = {
         ...data,
-        universityId: program.universityId, // Maintain the universityId
+        universityId: program.universityId,
       };
       await api.put(
         `${GlobalConfig.apiUrl}/v1/university-programs/${program.id}`,
         payload
       );
       alert("Program updated successfully!");
-      onClose(true); // Close modal and trigger refresh
+      onClose(true);
     } catch (error) {
       console.error("Error updating program:", error);
       const serverErrors = error.response?.data?.errors;
@@ -85,7 +87,7 @@ export default function EditProgramModal({ program, onClose }) {
         `${GlobalConfig.apiUrl}/v1/university-programs/${program.id}`
       );
       alert("Program deleted successfully!");
-      onClose(true); // Close modal and refresh list
+      onClose(true);
     } catch (error) {
       console.error("Error deleting program:", error);
       alert("Failed to delete program. Please try again.");
@@ -98,11 +100,10 @@ export default function EditProgramModal({ program, onClose }) {
         onSubmit={handleSubmit(onSubmit)}
         className="modal-box flex flex-col gap-4 border border-primary"
       >
-        <h2 className="text-lg font-bold">Edit Program: {program.name}</h2>
-
+        <h2 className="text-lg font-bold">Edit Program: {program.name}</h2>     
         <div className="form-control">
           <label className="label">
-            <span className="label-text">Program Name</span>
+                        <span className="label-text">Program Name</span>       
           </label>
           <input
             type="text"
@@ -114,10 +115,29 @@ export default function EditProgramModal({ program, onClose }) {
             <p className="text-red-500 text-sm">{errors.name.message}</p>
           )}
         </div>
-
         <div className="form-control">
           <label className="label">
-            <span className="label-text">Duration (Years)</span>
+                        <span className="label-text">Program Type</span>{" "}
+          </label>
+          <select
+            {...register("programTypeId")}
+            className="select select-bordered w-full"
+          >
+            {programTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                                {type.name}             {" "}
+              </option>
+            ))}
+          </select>
+          {errors.programTypeId && (
+            <p className="text-red-500 text-sm">
+              {errors.programTypeId.message}
+            </p>
+          )}
+        </div>
+        <div className="form-control">
+          <label className="label">
+                        <span className="label-text">Duration (Years)</span>   
           </label>
           <input
             type="number"
@@ -128,11 +148,10 @@ export default function EditProgramModal({ program, onClose }) {
           />
           {errors.durationYears && (
             <p className="text-red-500 text-sm">
-              {errors.durationYears.message}
+                            {errors.durationYears.message}           {" "}
             </p>
           )}
         </div>
-
         <div className="form-control">
           <label className="label cursor-pointer justify-start gap-2">
             <input
@@ -140,16 +159,15 @@ export default function EditProgramModal({ program, onClose }) {
               className="checkbox checkbox-primary"
               {...register("isActive")}
             />
-            <span className="label-text">Is Active</span>
+                        <span className="label-text">Is Active</span>         {" "}
           </label>
           {errors.isActive && (
             <p className="text-red-500 text-sm">{errors.isActive.message}</p>
           )}
         </div>
-
         <div className="form-control">
           <label className="label">
-            <span className="label-text">Description (Optional)</span>
+            <span className="label-text">Description (Optional)</span>         {" "}
           </label>
           <textarea
             placeholder="Description of the program"
@@ -160,26 +178,24 @@ export default function EditProgramModal({ program, onClose }) {
             <p className="text-red-500 text-sm">{errors.description.message}</p>
           )}
         </div>
-
         <div className="modal-action justify-between">
           <button
             type="button"
             className="btn btn-error btn-outline"
             onClick={onDelete}
           >
-            Delete Program
+                        Delete Program          {" "}
           </button>
-
           <div className="flex gap-2">
             <button
               type="button"
               className="btn btn-secondary btn-outline"
               onClick={() => onClose(false)}
             >
-              Cancel
+                            Cancel            {" "}
             </button>
             <button type="submit" className="btn btn-primary btn-outline">
-              Save Changes
+                            Save Changes            {" "}
             </button>
           </div>
         </div>

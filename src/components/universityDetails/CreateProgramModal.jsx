@@ -5,7 +5,6 @@ import { GlobalConfig } from "../../GlobalConfig.jsx";
 import api from "../../utils/service-base";
 import Modal from "../Modal.jsx"; // Assuming your Modal component path
 
-// Define the Zod schema for program creation
 const createProgramSchema = z.object({
   name: z.string().min(1, "Program name is required"),
   durationYears: z.preprocess(
@@ -14,10 +13,14 @@ const createProgramSchema = z.object({
   ),
   isActive: z.boolean(),
   description: z.string().optional(),
-  // universityId is passed via props, not part of the form fields directly for simplicity
+  programTypeId: z.string().min(1, "Program type is required"),
 });
 
-export default function CreateProgramModal({ universityId, onClose }) {
+export default function CreateProgramModal({
+  universityId,
+  onClose,
+  programTypes,
+}) {
   const {
     register,
     handleSubmit,
@@ -49,7 +52,6 @@ export default function CreateProgramModal({ universityId, onClose }) {
       const serverErrors = error.response?.data?.errors;
       if (serverErrors) {
         Object.keys(serverErrors).forEach((key) => {
-          // Adjust key mapping if backend returns different field names (e.g., 'Name' instead of 'name')
           setError(key.toLowerCase(), {
             type: "server",
             message: serverErrors[key].join(", "),
@@ -67,7 +69,10 @@ export default function CreateProgramModal({ universityId, onClose }) {
         onSubmit={handleSubmit(onSubmit)}
         className="modal-box border border-primary flex flex-col gap-4"
       >
-        <h2 className="font-bold text-lg">Create New Program at {universityId ? "this University" : "Unknown University"}</h2>
+        <h2 className="font-bold text-lg">
+          Create New Program at{" "}
+          {universityId ? "this University" : "Unknown University"}
+        </h2>
 
         <div className="form-control">
           <label className="label">
@@ -86,6 +91,27 @@ export default function CreateProgramModal({ universityId, onClose }) {
 
         <div className="form-control">
           <label className="label">
+            <span className="label-text">Program Type</span>
+          </label>
+          <select
+            {...register("programTypeId")}
+            className="select select-bordered w-full"
+          >
+            {programTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+          {errors.programTypeId && (
+            <p className="text-red-500 text-sm">
+              {errors.programTypeId.message}
+            </p>
+          )}
+        </div>
+
+        <div className="form-control">
+          <label className="label">
             <span className="label-text">Duration (Years)</span>
           </label>
           <input
@@ -96,7 +122,9 @@ export default function CreateProgramModal({ universityId, onClose }) {
             className="input input-bordered w-full"
           />
           {errors.durationYears && (
-            <p className="text-red-500 text-sm">{errors.durationYears.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.durationYears.message}
+            </p>
           )}
         </div>
 

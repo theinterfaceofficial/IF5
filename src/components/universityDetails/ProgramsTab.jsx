@@ -1,18 +1,16 @@
-// ProgramsTab.jsx (Updated imports and usage)
-
 import { GlobalConfig } from "../../GlobalConfig";
 import { useState, useEffect } from "react";
 import api from "../../utils/service-base";
 import useDebounce from "../../hooks/useDebounce";
-import { AnimatePresence, motion } from "framer-motion";
-
-// Import the new modal components
-import CreateProgramModal from "../../components/universityDetails/CreateProgramModal"; // Adjust path as needed
-import EditProgramModal from "../../components/universityDetails/EditProgramModal"; // Adjust path as needed
+import { AnimatePresence, motion } from "motion/react";
+import CreateProgramModal from "./CreateProgramModal";
+import EditProgramModal from "./EditProgramModal";
 
 export default function ProgramsTab({ university }) {
   const [programs, setPrograms] = useState([]);
+  const [programTypes, setProgramTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -43,9 +41,22 @@ export default function ProgramsTab({ university }) {
       setPrograms(response.data.programs);
       setTotalCount(response.data.totalCount);
       setTotalPages(response.data.totalPages);
-    } catch (error) {
-      console.error("Error fetching university programs:", error);
-      // Consider adding a user-facing error notification here
+    } catch {
+      setError("Failed to fetch university programs.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProgramTypes = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(
+        `${GlobalConfig.apiUrl}/v1/program-types/all`
+      );
+      setProgramTypes(response.data);
+    } catch {
+      setError("Failed to load program types.");
     } finally {
       setLoading(false);
     }
@@ -54,6 +65,7 @@ export default function ProgramsTab({ university }) {
   useEffect(() => {
     if (university?.id) {
       fetchPrograms();
+      fetchProgramTypes();
     }
   }, [debouncedSearchTerm, pageNumber, pageSize, university?.id]);
 
@@ -87,7 +99,7 @@ export default function ProgramsTab({ university }) {
 
   const closeEditProgramModal = (refresh) => {
     setIsEditModalOpen(false);
-    setSelectedProgram(null); // Clear selected program when modal closes
+    setSelectedProgram(null);
     if (refresh) {
       fetchPrograms();
     }
@@ -122,6 +134,7 @@ export default function ProgramsTab({ university }) {
         <thead>
           <tr>
             <th>Name</th>
+            <th>Type</th>
             <th>Duration (Years)</th>
             <th>Status</th>
             <th>Created On</th>
@@ -130,7 +143,7 @@ export default function ProgramsTab({ university }) {
         {loading ? (
           <tbody>
             <tr>
-              <td colSpan="4">
+              <td colSpan="5">
                 <div className="loading loading-spinner"></div>
               </td>
             </tr>
@@ -146,6 +159,7 @@ export default function ProgramsTab({ university }) {
                   onClick={() => showEditProgramModal(program)}
                 >
                   <td>{program.name}</td>
+                  <td>{program.programTypeName}</td>
                   <td>{program.durationYears}</td>
                   <td>{program.isActive ? "Active" : "Inactive"}</td>
                   <td>{new Date(program.createdOn).toLocaleDateString()}</td>
@@ -153,7 +167,7 @@ export default function ProgramsTab({ university }) {
               ))
             ) : (
               <tr>
-                <td colSpan="4">No programs found for this university.</td>
+                <td colSpan="5">No programs found for this university.</td>
               </tr>
             )}
           </tbody>
@@ -183,8 +197,9 @@ export default function ProgramsTab({ university }) {
       <AnimatePresence>
         {isCreateModalOpen && (
           <CreateProgramModal
-            universityId={university.id} // Pass the universityId to the create modal
+            universityId={university.id}
             onClose={closeCreateProgramModal}
+            programTypes={programTypes}
           />
         )}
       </AnimatePresence>
@@ -194,6 +209,7 @@ export default function ProgramsTab({ university }) {
           <EditProgramModal
             program={selectedProgram}
             onClose={closeEditProgramModal}
+            programTypes={programTypes}
           />
         )}
       </AnimatePresence>

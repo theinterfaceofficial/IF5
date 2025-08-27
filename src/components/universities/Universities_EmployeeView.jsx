@@ -3,7 +3,7 @@ import { GlobalConfig } from "../../GlobalConfig";
 import { useState, useEffect } from "react";
 import api from "../../utils/service-base";
 import useDebounce from "../../hooks/useDebounce";
-import { AnimatePresence, motion } from "framer-motion"; // Changed to framer-motion for consistency if you use it for AnimatePresence
+import { AnimatePresence, motion } from "motion/react";
 import CreateUniversityModal from "../../components/universities/CreateUniversityModal";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 import { useNavigate } from "react-router-dom";

@@ -9,18 +9,13 @@ export default function Universitites() {
   switch (role) {
     case "Student":
       return <Universities_StudentView />;
+    case "ImmigrationClient":
+      return <Universities_StudentView />;
     case "Employee":
       return <Universities_EmployeeView />;
     case "Admin":
       return <Universities_EmployeeView />;
     default:
-      break;
+      return <Universities_StudentView />;
   }
-
-  return (
-    <div>
-      <h1>Universities</h1>
-      <p>This is the Universities page.</p>
-    </div>
-  );
 }
