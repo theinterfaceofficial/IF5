@@ -3,13 +3,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GlobalConfig } from "../../GlobalConfig.jsx";
 import api from "../../utils/service-base.js";
-import Modal from "../Modal.jsx"; // Assuming path
+import Modal from "../Modal.jsx";
+import { useState } from "react";
 
 const documentSchema = z.object({
-  //   fileName: z.string().min(1, "File Name is required"),
   description: z.string().optional(),
   documentTypeId: z.string().min(1, "Document Type is required"),
-  // We'll handle the actual file object separately, not directly in Zod for simplicity of basic input
 });
 
 export default function CreateDocumentModal({
@@ -17,6 +16,7 @@ export default function CreateDocumentModal({
   documentTypes,
   onClose,
 }) {
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -28,15 +28,11 @@ export default function CreateDocumentModal({
   });
 
   const onSubmit = async (data) => {
-    // For file uploads, typically you'd use FormData.
-    // Assuming your API expects multipart/form-data for file uploads.
-    // The backend will handle S3Key and FileSize from the uploaded file.
+    setLoading(true);
     const formData = new FormData();
-    // formData.append("FileName", data.fileName);
     formData.append("Description", data.description || "");
     formData.append("DocumentTypeId", data.documentTypeId);
 
-    // Get the file from the input. Assuming a single file input named 'file'
     const fileInput = document.getElementById("file-upload-input"); // Get input by ID
     if (fileInput && fileInput.files[0]) {
       formData.append("File", fileInput.files[0]); // Append the actual file
@@ -72,6 +68,9 @@ export default function CreateDocumentModal({
         console.error("Error creating document:", error);
       }
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,22 +80,10 @@ export default function CreateDocumentModal({
         className="modal-box border border-primary flex flex-col gap-4"
       >
         <h2 className="font-bold text-lg">Create Document</h2>
-        {/* <div className="form-control">
-          <input
-            type="text"
-            placeholder="File Name"
-            {...register("fileName")}
-            className="input w-full"
-          />
-          {errors.fileName && (
-            <p className="text-red-500 text-sm">{errors.fileName.message}</p>
-          )}
-        </div> */}
-
         <div className="form-control">
           <input
             type="file"
-            id="file-upload-input" // Add an ID to easily access the file input
+            id="file-upload-input"
             className="file-input file-input-bordered w-full"
           />
           {errors.file && (
@@ -139,10 +126,11 @@ export default function CreateDocumentModal({
             type="button"
             className="btn btn-secondary btn-outline"
             onClick={() => onClose(false)}
+            disabled={loading}
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary btn-outline">
+          <button type="submit" className="btn btn-primary btn-outline" disabled={loading}>
             Create
           </button>
         </div>

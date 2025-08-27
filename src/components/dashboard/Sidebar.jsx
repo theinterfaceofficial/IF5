@@ -18,12 +18,12 @@ export default function Sidebar() {
       className="border-r border-base-300 bg-base-100/50 min-h-screen flex flex-col gap-y-4 px-2 py-4"
     >
       <img src={Logo} alt="Logo" className="w-1/2 mx-auto" />
-      {(role === "Admin" || role === "Employee" || role === "Partner") && (
-        <SidebarContent />
-      )}
-      {(role === "Student" || role === "ImmigrationClient") && (
-        <ClientSidebarContent />
-      )}
+      {/* {(role === "Admin" || role === "Employee" || role === "Partner") && ( */}
+      <SidebarContent />
+      {/* )} */}
+      {/* {(role === "Student" || role === "ImmigrationClient") && ( */}
+      {/* <ClientSidebarContent /> */}
+      {/* )} */}
     </motion.aside>
   );
 }

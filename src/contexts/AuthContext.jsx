@@ -41,6 +41,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("refreshToken");
   };
 
+  const getId = () => {
+    if (!accessToken) return null;
+    const payload = JSON.parse(atob(accessToken.split(".")[1]));
+    return payload.sub || null;
+  };
+
   const getRole = () => {
     if (!accessToken) return null;
     const payload = JSON.parse(atob(accessToken.split(".")[1]));
@@ -70,6 +76,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     isAuthenticated,
+    getId,
     getRole,
     getEmail,
     getPermissions,

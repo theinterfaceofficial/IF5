@@ -25,6 +25,7 @@ export default function Dashboard() {
         navigate("/dashboard/users/my-students");
         break;
       case "Student":
+        navigate("/dashboard/documents");
         break;
     }
   }, [role, navigate]);

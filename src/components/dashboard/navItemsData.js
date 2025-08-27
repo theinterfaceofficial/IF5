@@ -5,6 +5,8 @@ import {
   Bell,
   GraduationCap,
   User,
+  File,
+  Plane,
 } from "lucide-react";
 
 export const navItems = [
@@ -98,16 +100,6 @@ export const navItems = [
     ],
   },
 
-  // Universities
-  {
-    type: "static",
-    icon: GraduationCap,
-    title: "Universities",
-    to: "/dashboard/universities",
-    roles: ["Admin", "Employee"],
-    permission: ["Universities_Read"],
-  },
-
   // Portal
   {
     type: "collapsible",
@@ -195,6 +187,55 @@ export const navItems = [
         permission: ["VisaApplicationTypes_Read"],
       },
     ],
+  },
+
+  // My Documents
+  {
+    type: "static",
+    icon: File,
+    title: "My Documents",
+    to: "/dashboard/documents",
+    roles: ["Student", "ImmigrationClient"],
+    permission: ["Documents_Own_Read"],
+  },
+
+  // My Uni Applications
+  {
+    type: "static",
+    icon: GraduationCap,
+    title: "University Applications",
+    to: "/dashboard/university-applications",
+    roles: ["Student"],
+    permission: ["UniversityApplications_Own_Read"],
+  },
+
+  // My Visa Applications
+  {
+    type: "static",
+    icon: Plane,
+    title: "Visa Applications",
+    to: "/dashboard/visa-applications",
+    roles: ["Student", "ImmigrationClient"],
+    permission: ["VisaApplications_Own_Read"],
+  },
+
+  // Universities
+  {
+    type: "static",
+    icon: GraduationCap,
+    title: "Universities",
+    to: "/dashboard/universities",
+    roles: ["Admin", "Employee", "Student"],
+    permission: ["Universities_Read"],
+  },
+
+  // Communitites
+  {
+    type: "static",
+    icon: Users,
+    title: "Communities",
+    to: "/dashboard/communities",
+    permission: ["Communities_Read"],
   },
 
   // Notifications

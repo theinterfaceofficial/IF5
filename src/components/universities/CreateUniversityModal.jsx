@@ -51,6 +51,7 @@ const createUniversitySchema = z.object({
 });
 
 export default function CreateUniversityModal({ onClose }) {
+  const [loading, setLoading] = useState(false);
   const [locations, setLocations] = useState([]);
   const [universityTypes, setUniversityTypes] = useState([]);
   const [dropdownsLoading, setDropdownsLoading] = useState(true);

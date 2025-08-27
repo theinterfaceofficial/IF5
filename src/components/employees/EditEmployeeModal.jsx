@@ -126,6 +126,22 @@ const ALL_PERMISSIONS = [
   "Portal_Overview",
   "Users_Overview",
   "Finances_Overview",
+  "Communities_Create",
+  "Communities_Read",
+  "Communities_Update",
+  "Communities_Delete",
+  "Posts_Create",
+  "Posts_Read",
+  "Posts_Update",
+  "Posts_Delete",
+  "Posts_Own_Update",
+  "Posts_Own_Delete",
+  "Comments_Create",
+  "Comments_Read",
+  "Comments_Update",
+  "Comments_Delete",
+  "Comments_Own_Update",
+  "Comments_Own_Delete",
 ];
 
 const editEmployeeSchema = z.object({

@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:8080/api",
 });
 
-// A flag to prevent multiple refresh token requests at once
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -90,7 +89,7 @@ api.interceptors.response.use(
         // Refresh token failed (e.g., refresh token expired or invalid)
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/auth/login";
+        window.location.href = "/auth/session-expired";
         isRefreshing = false;
         processQueue(refreshError); // Reject all queued requests
         return Promise.reject(refreshError);

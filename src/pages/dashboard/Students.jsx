@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,13 +18,24 @@ export default function Students() {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  // New state to manage the active status filter. `null` represents the "All" option.
   const [isActive, setIsActive] = useState(null);
+  const [registeredById, setRegisteredById] = useState(null);
+  const [startDate, setStartDate] = useState(""); // New state for start date
+  const [endDate, setEndDate] = useState(""); // New state for end date
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const navigate = useNavigate();
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await api.get(`${GlobalConfig.apiUrl}/v1/employees/all`);
+      setEmployees(response.data.employees);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
+  };
 
   const fetchStudents = async () => {
     try {
@@ -34,9 +46,21 @@ export default function Students() {
         pageSize: pageSize,
       };
 
-      // Add the isActive parameter to the request only if it's not null.
       if (isActive !== null) {
         params.isActive = isActive;
+      }
+
+      if (registeredById !== null) {
+        params.registeredById = registeredById;
+      }
+
+      // Add the date parameters to the request
+      if (startDate) {
+        params.startDate = startDate;
+      }
+
+      if (endDate) {
+        params.endDate = endDate;
       }
 
       const response = await api.get(`${GlobalConfig.apiUrl}/v1/students`, {
@@ -54,9 +78,20 @@ export default function Students() {
   };
 
   useEffect(() => {
-    // The useEffect hook now also re-fetches data when the `isActive` state changes.
     fetchStudents();
-  }, [debouncedSearchTerm, pageNumber, pageSize, isActive]);
+  }, [
+    debouncedSearchTerm,
+    pageNumber,
+    pageSize,
+    isActive,
+    registeredById,
+    startDate,
+    endDate,
+  ]);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   const handlePrevious = () => {
     if (pageNumber > 1) {
@@ -85,7 +120,6 @@ export default function Students() {
     navigate(`${studentId}`);
   };
 
-  // Handler for the select dropdown change
   const handleIsActiveChange = (e) => {
     const value = e.target.value;
     let newIsActive = null;
@@ -94,9 +128,26 @@ export default function Students() {
     } else if (value === "False") {
       newIsActive = false;
     }
-    // Set page to 1 whenever the filter changes
     setPageNumber(1);
     setIsActive(newIsActive);
+  };
+
+  const handleRegisteredByChange = (e) => {
+    const value = e.target.value;
+    const newRegisteredById = value === "All" ? null : value;
+    setPageNumber(1);
+    setRegisteredById(newRegisteredById);
+  };
+
+  // New handlers for date inputs
+  const handleStartDateChange = (e) => {
+    setPageNumber(1);
+    setStartDate(e.target.value);
+  };
+
+  const handleEndDateChange = (e) => {
+    setPageNumber(1);
+    setEndDate(e.target.value);
   };
 
   if (error) {
@@ -111,32 +162,55 @@ export default function Students() {
     <DashboardPage title="Students">
       <h1 className="text-2xl font-bold">Manage Students</h1>
 
-      <div className="flex items-center justify-between py-2">
-        <div className="flex items-center flex-1 gap-2">
-          <input
-            type="text"
-            placeholder="Search students by name or email..."
-            className="input"
-            value={searchTerm}
-            onChange={(e) => {
-              setPageNumber(1);
-              setSearchTerm(e.target.value);
-            }}
-          />
-          {/* The select element now has a value and onChange handler */}
-          <select
-            className="select"
-            value={
-              isActive === null ? "All" : isActive === true ? "True" : "False"
-            }
-            onChange={handleIsActiveChange}
-          >
-            <option value="All">All</option>
-            <option value="True">Active</option>
-            <option value="False">Inactive</option>
-          </select>
-        </div>
+      <div className="flex items-center justify-between py-2 gap-2">
+        <input
+          type="text"
+          placeholder="Search students by name or email..."
+          className="input"
+          value={searchTerm}
+          onChange={(e) => {
+            setPageNumber(1);
+            setSearchTerm(e.target.value);
+          }}
+        />
+        <select
+          className="select"
+          value={
+            isActive === null ? "All" : isActive === true ? "True" : "False"
+          }
+          onChange={handleIsActiveChange}
+        >
+          <option value="All">All</option>
+          <option value="True">Active</option>
+          <option value="False">Inactive</option>
+        </select>
 
+        <select
+          className="select"
+          value={registeredById || "All"}
+          onChange={handleRegisteredByChange}
+        >
+          <option value="All">All Registered By</option>
+          {employees.map((employee) => (
+            <option key={employee.id} value={employee.id}>
+              {employee.firstName} {employee.lastName} ({employee.email})
+            </option>
+          ))}
+        </select>
+        <input
+          type="date"
+          className="input"
+          value={startDate}
+          onChange={handleStartDateChange}
+          placeholder="Start Date"
+        />
+        <input
+          type="date"
+          className="input"
+          value={endDate}
+          onChange={handleEndDateChange}
+          placeholder="End Date"
+        />
         <button
           className="btn btn-primary btn-outline"
           onClick={showCreateStudentModal}
@@ -145,63 +219,67 @@ export default function Students() {
         </button>
       </div>
 
-      <table className="table text-center">
-        <thead className="bg-base-200">
-          <tr>
-            <th>Email</th>
-            <th>First Name</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Phone Number</th>
-            <th>Active</th>
-            <th>Registered By</th>
-            <th>Registration Date</th>
-            <th>Counselor Name</th>
-            <th>Admission Associate Name</th>
-          </tr>
-        </thead>
-        {loading ? (
-          <tbody>
+      <div className="overflow-x-auto">
+        <table className="table text-center">
+          <thead className="bg-base-200">
             <tr>
-              <td colSpan="10">
-                <div className="loading loading-spinner"></div>
-              </td>
+              <th>Email</th>
+              <th>First Name</th>
+              <th>Middle Name</th>
+              <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Active</th>
+              <th>Registered By</th>
+              <th>Registration Date</th>
+              <th>Counselor Name</th>
+              <th>Admission Associate Name</th>
             </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {students.length === 0 ? (
+          </thead>
+          {loading ? (
+            <tbody>
               <tr>
-                <td colSpan="10">No students found.</td>
+                <td colSpan="10">
+                  <div className="loading loading-spinner"></div>
+                </td>
               </tr>
-            ) : (
-              students.map((student) => (
-                <motion.tr
-                  className="cursor-pointer"
-                  whileHover={{ scale: 1.01 }}
-                  key={student.id}
-                  onClick={() => navigateToStudentDetails(student.id)}
-                >
-                  <td>{student.email}</td>
-                  <td>{student.firstName}</td>
-                  <td>{student.middleName || "-"}</td>
-                  <td>{student.lastName}</td>
-                  <td>{student.phoneNumber || "-"}</td>
-                  <td>{student.isActive ? "Yes" : "No"}</td>
-                  <td>{student.registeredByName || "-"}</td>
-                  <td>
-                    {student.registrationDate
-                      ? new Date(student.registrationDate).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>{student.counselorName || "-"}</td>
-                  <td>{student.admissionAssociateName || "-"}</td>
-                </motion.tr>
-              ))
-            )}
-          </tbody>
-        )}
-      </table>
+            </tbody>
+          ) : (
+            <tbody>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="10">No students found.</td>
+                </tr>
+              ) : (
+                students.map((student) => (
+                  <motion.tr
+                    className="cursor-pointer"
+                    whileHover={{ scale: 1.01 }}
+                    key={student.id}
+                    onClick={() => navigateToStudentDetails(student.id)}
+                  >
+                    <td>{student.email}</td>
+                    <td>{student.firstName}</td>
+                    <td>{student.middleName || "-"}</td>
+                    <td>{student.lastName}</td>
+                    <td>{student.phoneNumber || "-"}</td>
+                    <td>{student.isActive ? "Yes" : "No"}</td>
+                    <td>{student.registeredByName || "-"}</td>
+                    <td>
+                      {student.registrationDate
+                        ? new Date(
+                            student.registrationDate
+                          ).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>{student.counselorName || "-"}</td>
+                    <td>{student.admissionAssociateName || "-"}</td>
+                  </motion.tr>
+                ))
+              )}
+            </tbody>
+          )}
+        </table>
+      </div>
 
       {/* Pagination Controls */}
       <div className="flex justify-between items-center py-4">

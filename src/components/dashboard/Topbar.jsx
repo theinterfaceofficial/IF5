@@ -1,13 +1,19 @@
 import { useSidebar } from "../../contexts/SidebarContext";
-import { Sidebar } from "lucide-react";
+import { Sidebar, LogOut, Home } from "lucide-react"; // Import Home icon
 import { useAuth } from "../../contexts/AuthContext";
-import { AnimatePresence, motion } from "motion/react";
-import { LogOut } from "lucide-react";
+import { motion } from "motion/react";
+import { useLocation, Link } from "react-router-dom"; // Import router hooks
 
 export default function Topbar() {
   const { toggleSidebar } = useSidebar();
   const { logout, getEmail } = useAuth();
   const email = getEmail();
+
+  // --- Breadcrumb Logic ---
+  const location = useLocation();
+  // Split the pathname and filter out empty strings
+  const pathnames = location.pathname.split("/").filter((x) => x);
+  // --- End of Breadcrumb Logic ---
 
   const handleLogout = () => {
     logout();
@@ -25,6 +31,40 @@ export default function Topbar() {
           <Sidebar size={20} strokeWidth={2} />
         </motion.button>
       </div>
+
+      {/* 👇 BREADCRUMBS SECTION ADDED HERE 👇 */}
+      <div className="navbar-center hidden md:flex">
+        <div className="text-sm breadcrumbs">
+          <ul>
+            <li>
+              <Link to="/dashboard" className="flex items-center gap-1">
+                Dashboard
+              </Link>
+            </li>
+            {pathnames.map((name, index) => {
+              // Make the path cumulative for each breadcrumb link
+              const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
+              const isLast = index === pathnames.length - 1;
+
+              // Don't show the "dashboard" path again if it's the first segment
+              if (name.toLowerCase() === "dashboard") return null;
+
+              return isLast ? (
+                <li key={routeTo}>
+                  <span className="capitalize">{name}</span>
+                </li>
+              ) : (
+                <li key={routeTo}>
+                  <Link to={routeTo} className="capitalize">
+                    {name}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+      {/* 👆 END OF BREADCRUMBS SECTION 👆 */}
 
       <div className="navbar-end">
         <motion.button

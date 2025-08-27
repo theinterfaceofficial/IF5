@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { set, z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GlobalConfig } from "../../GlobalConfig.jsx";
 import api from "../../utils/service-base.js";
 import { useEffect } from "react";
-import Modal from "../Modal.jsx"; // Assuming path
+import Modal from "../Modal.jsx";
+import { useState } from "react";
 
-// Define the DocumentStatus enum options for the frontend
 const DocumentStatusOptions = [
   { value: 0, label: "Under Review" },
   { value: 1, label: "Approved" },
@@ -29,6 +29,7 @@ export default function EditDocumentModal({
   documentTypes,
   onClose,
 }) {
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -58,6 +59,7 @@ export default function EditDocumentModal({
 
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const payload = {
         ...data,
         documentStatus: parseInt(data.documentStatus, 10),
@@ -82,6 +84,8 @@ export default function EditDocumentModal({
         alert("An unexpected error occurred.");
         console.error("Error updating document:", error);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,6 +96,7 @@ export default function EditDocumentModal({
     if (!confirmed) return;
 
     try {
+      setLoading(true);
       await api.delete(
         `${GlobalConfig.apiUrl}/v1/client-users/${studentId}/documents/${document.id}`
       );
@@ -101,6 +106,8 @@ export default function EditDocumentModal({
     } catch (error) {
       alert("Failed to delete document.");
       console.error("Error deleting document:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,6 +185,7 @@ export default function EditDocumentModal({
             type="button"
             className="btn btn-error btn-outline"
             onClick={onDelete}
+            disabled={loading}
           >
             Delete
           </button>
@@ -187,10 +195,15 @@ export default function EditDocumentModal({
               type="button"
               className="btn btn-secondary btn-outline"
               onClick={() => onClose(false)}
+              disabled={loading}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary btn-outline">
+            <button
+              type="submit"
+              className="btn btn-primary btn-outline"
+              disabled={loading}
+            >
               Save
             </button>
           </div>

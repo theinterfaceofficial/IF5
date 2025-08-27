@@ -42,6 +42,15 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ClientSources from "./pages/dashboard/ClientSources.jsx";
 import MyStudents from "./pages/dashboard/MyStudents.jsx";
 import MyImmigrationClients from "./pages/dashboard/MyImmigrationClients.jsx";
+import SessionExpired from "./pages/auth/SessionExpired.jsx";
+import Communities from "./pages/dashboard/Communities.jsx";
+import Posts from "./pages/dashboard/Posts.jsx";
+import Services from "./pages/Services.jsx";
+import TermsOfService from "./pages/TermsOfService.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import MyDocuments from "./pages/dashboard/MyDocuments.jsx";
+import MyUniversityApplications from "./pages/dashboard/MyUniversityApplications.jsx";
+import MyVisaApplications from "./pages/dashboard/MyVisaApplications.jsx";
 
 function App() {
   return (
@@ -52,6 +61,9 @@ function App() {
         <Route path="team" element={<Team />} />
         <Route path="testimonials" element={<Testimonials />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="services" element={<Services />} />
+        <Route path="terms-of-service" element={<TermsOfService />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
       </Route>
 
       <Route path="/auth" element={<AuthLayout />}>
@@ -59,6 +71,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="session-expired" element={<SessionExpired />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
@@ -106,7 +119,16 @@ function App() {
         "{/* Universities Routes */}
         <Route path="universities" element={<Universities />} />
         <Route path="universities/:id" element={<UniversityDetails />} />
+        {/* Client Routes */}
+        <Route path="documents" element={<MyDocuments />} />
+        <Route
+          path="university-applications"
+          element={<MyUniversityApplications />}
+        />
+        <Route path="visa-applications" element={<MyVisaApplications />} />
         {/* Others */}
+        <Route path="communities" element={<Communities />} />
+        <Route path="communities/:communityId/posts" element={<Posts />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="profile" element={<Profile />} />
         <Route path="audit-logs" element={<AuditLogs />} />

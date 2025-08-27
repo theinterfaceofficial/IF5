@@ -23,7 +23,7 @@ function LayoutWithSidebar() {
     <div className="flex">
       <AnimatePresence>{isOpen && <Sidebar />}</AnimatePresence>
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0">
         <ParallaxBg imageUrl="/parallax-bg.png" />
         <Topbar />
         <Outlet />
